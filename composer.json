@@ -1,6 +1,6 @@
 {
-  "name": "elementsproject/lightning-charge-client-php",
-  "description": "PHP client for the Lightning Charge REST API",
+  "name": "analogic/lightning-charge-client-php7",
+  "description": "PHP7 client for the Lightning Charge REST API",
   "version": "0.1.4",
   "license": "MIT",
   "require": {
