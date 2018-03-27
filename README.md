@@ -15,21 +15,28 @@ $ composer require elementsproject/lightning-charge-client-php
 require_once 'vendor/autoload.php';
 
 // Initialize client
-$charge = new LightningChargeClient('http://localhost:8009', '[TOKEN]');
+$charge = new \LightningCharge\Client('http://localhost:8009', '[TOKEN]');
 
 // Create invoice
-$invoice = $charge->invoice([ 'msatoshi' => 50, 'metadata' => [ 'customer' => 'Satoshi', 'products' => [ 'potato', 'chips' ] ] ]);
+$request = new \LightningCharge\InvoiceRequest();
+$request->setMilliSatoshi(50);
+$request->setMetadata(['customer' => [ 'customer' => 'Satoshi', 'products' => [ 'potato', 'chips']]]);
+$invoice = $charge->invoice($request);
 
-tell_user("to pay, send $invoice->msatoshi milli-satoshis with rhash $invoice->rhash, or copy the BOLT11 payment request: $invoice->payreq");
+tell_user("to pay, send ".$invoice->getMilliSatoshi()." milli-satoshis with rhash ".$invoice->getRhash().", or copy the BOLT11 payment request: ".$invoice->getPayreq());
+
 
 // Create invoice denominated in USD
-$invoice = $charge->invoice([ 'currency' => 'USD', 'amount' => 0.15 ]);
+$request = new \LightningCharge\InvoiceRequest();
+$request->setCurrency('USD');
+$request->setAmount(0.15);
+$invoice = $charge->invoice($request);
 
 // Fetch invoice by id
 $invoice = $charge->fetch('m51vlVWuIKGumTLbJ1RPb');
 
 // Fetch all invoices
-$invoice = $charge->fetchAll();
+$invoices = $charge->fetchAll();
 
 // Register web hook
 $charge->registerHook('m51vlVWuIKGumTLbJ1RPb', 'http://my-server.com/my-callback-url');
@@ -40,7 +47,12 @@ $charge->registerHook('m51vlVWuIKGumTLbJ1RPb', 'http://my-server.com/my-callback
 ## Test
 
 ```bash
-$ CHARGE_URL=http://api-token:[TOKEN]@localhost:8009 phpunit test
+$ composer install
+$ mkdir /tmp/data
+$ docker run -u `id -u` -v /tmp/data:/data -p 9112:9112 \
+             -e API_TOKEN=mySecretToken \
+             shesek/lightning-charge
+$ CHARGE_URL=http://api-token:mySecretToken@localhost:9112 vendor/bin/phpunit test
 ```
 
 ## License
